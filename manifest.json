@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Grocery - YemekSepeti Otomatik Sepete Ekleme",
+  "version": "1.0.0",
+  "description": "YemekSepeti Market'te malzemeleri otomatik olarak sepete ekler",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "notifications"
+  ],
+  "host_permissions": [
+    "*://www.yemeksepeti.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.yemeksepeti.com/market*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Smart Grocery Extension"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png", 
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
