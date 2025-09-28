@@ -153,3 +153,105 @@ async function searchAndAddProduct(ingredient, current, total) {
         return { success: false, message: error.message };
     }
 }
+
+// content.js'in eksik fonksiyonlarını ekleyin:
+
+// Text yazma fonksiyonu
+async function typeText(element, text) {
+    return new Promise(resolve => {
+        element.focus();
+        element.value = '';
+        
+        let index = 0;
+        const interval = setInterval(() => {
+            if (index < text.length) {
+                element.value += text[index];
+                element.dispatchEvent(new Event('input', { bubbles: true }));
+                index++;
+            } else {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 100);
+    });
+}
+
+// Sonuçların yüklenmesini bekleme
+async function waitForResults() {
+    return new Promise(resolve => {
+        let attempts = 0;
+        const checkForResults = () => {
+            attempts++;
+            const products = document.querySelectorAll('.product-list .product-item, .products .product, .product-grid .product-card');
+            
+            if (products.length > 0 || attempts > 10) {
+                resolve();
+            } else {
+                setTimeout(checkForResults, 1000);
+            }
+        };
+        
+        setTimeout(checkForResults, 2000);
+    });
+}
+
+// Progress indicator gösterme
+function showProgressIndicator(total) {
+    const progressDiv = document.createElement('div');
+    progressDiv.id = 'smart-grocery-progress';
+    progressDiv.innerHTML = `
+        <div style="position: fixed; top: 20px; right: 20px; background: white; 
+                    padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+                    z-index: 10000; min-width: 300px; border: 2px solid #ff6b35;">
+            <h3 style="margin: 0 0 10px 0; color: #ff6b35;">🛍️ Smart Grocery</h3>
+            <div id="progress-text">Malzemeler sepete ekleniyor...</div>
+            <div style="background: #f0f0f0; height: 8px; border-radius: 4px; margin: 10px 0;">
+                <div id="progress-bar" style="background: #ff6b35; height: 8px; border-radius: 4px; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <div id="progress-details"></div>
+        </div>
+    `;
+    document.body.appendChild(progressDiv);
+}
+
+// Progress indicator güncelleme
+function updateProgressIndicator(current, total, ingredient, success) {
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const progressDetails = document.getElementById('progress-details');
+    
+    if (progressBar) {
+        progressBar.style.width = `${(current / total) * 100}%`;
+    }
+    
+    if (progressText) {
+        progressText.textContent = `${current}/${total} - ${ingredient}`;
+    }
+    
+    if (progressDetails) {
+        const statusIcon = success ? '✅' : '❌';
+        progressDetails.innerHTML += `<div>${statusIcon} ${ingredient}</div>`;
+        progressDetails.scrollTop = progressDetails.scrollHeight;
+    }
+}
+
+// Progress indicator gizleme
+function hideProgressIndicator() {
+    const progressDiv = document.getElementById('smart-grocery-progress');
+    if (progressDiv) {
+        progressDiv.remove();
+    }
+}
+
+// Sonuçları gösterme
+function showFinalResults() {
+    const successCount = addingProgress.filter(p => p.success).length;
+    const failCount = addingProgress.length - successCount;
+    
+    alert(`Sepete ekleme tamamlandı!\n✅ Başarılı: ${successCount}\n❌ Başarısız: ${failCount}`);
+}
+
+// Hata gösterme
+function showError(message) {
+    alert('Hata: ' + message);
+}
